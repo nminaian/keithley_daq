@@ -1,0 +1,14 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: a96df29
+_src_path: gh:blakeNaccarato/copier-python
+actions_runner: ubuntu-22.04
+active: true
+github_repo_name: keithley_daq
+project_description: Description
+project_email: n.minaian@gmail.com
+project_name: keithley_daq
+project_owner_github_username: nminaian
+project_owner_name: Nazanin Minaian
+project_version: 0.0.0
+python_version: '3.11'
+year_of_project_creation: 2024

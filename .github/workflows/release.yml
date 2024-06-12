@@ -1,0 +1,37 @@
+# Publish a Python package to PyPI
+name: "release"
+on:
+  workflow_dispatch:
+defaults:
+  run:
+    shell: "pwsh"
+env:
+  UV_CACHE_DIR: ".cache/uv-cache"
+  UV_SYSTEM_PYTHON: "true"
+jobs:
+  release:
+    strategy:
+      matrix:
+        runner: ["ubuntu-22.04"]
+        python: ["3.11"]
+    runs-on: "${{ matrix.runner }}"
+    steps:
+      - uses: "dropseed/changerelease@3b121c9e98fa055f59a32b023cb4fd2325f4d9dc" # v1.6.0
+        with:
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+          tag_prefix: ""
+      - uses: "actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332" # v4.1.7
+        with:
+          submodules: True
+      - uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
+        with:
+          path: "${{ env.UV_CACHE_DIR }}"
+          key: "uv-${{ matrix.runner }}-${{ matrix.python }}-${{ hashFiles('lock.json') }}"
+      - uses: "actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d" # v5.1.0
+        with:
+          python-version: "${{ matrix.python }}"
+      - run: "scripts/Sync-Py.ps1"
+      - run: "flit publish"
+        env:
+          FLIT_USERNAME: "__token__"
+          FLIT_PASSWORD: "${{ secrets.PYPI_TOKEN }}"

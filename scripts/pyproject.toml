@@ -1,0 +1,34 @@
+[build-system]
+requires = ["flit_core==3.9.0"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "keithley_daq_tools"
+version = "0.0.0"
+description = "Tools."
+dependencies = [
+    # ? Core script tools
+    "copier==9.2.0",
+    "cyclopts==2.7.0",
+    "ipython==8.25.0",
+    "pipx==1.6.0",
+]
+[project.scripts]
+"keithley_daq_tools" = "keithley_daq_tools.__main__:main"
+
+[tool.fawltydeps]
+deps = ["scripts/pyproject.toml"]
+code = ["scripts/keithley_daq_tools"]
+ignore_undeclared = [
+    "keithley_daq_docs",
+    "keithley_daq_tests",
+    "keithley_daq_tools",
+    "keithley_daq",
+]
+ignore_unused = [
+    # ? Core script tools
+    "copier", # For template sync
+    "pipx",   # For `pipx run` of scripts with dependencies isolated by PEP 723
+    # ? Other deps
+    "ipython", # Used for local experimentation
+]

@@ -1,0 +1,54 @@
+name: "🐞 Bug report"
+description: "Report a bug. Please don't request features or ask usage questions here."
+labels: ["bug"]
+body:
+  - type: "checkboxes"
+    id: "no-duplicates"
+    attributes:
+      label: "Please check that this bug hasn't been reported before"
+      options:
+        - required: True
+          label: "I searched [here](https://github.com/nminaian/keithley_daq/issues?q=label%3Abug+sort%3Acomments-desc) or [here](https://github.com/search?q=repo%3Anminaian/keithley_daq+label%3Abug&type=issues) and couldn't find a similar issue."
+  - type: "checkboxes"
+    id: "latest-version"
+    attributes:
+      label: "Please confirm that this bug affects the latest version"
+      description: "Please verify the issue is present in the latest version by installing it with `pip install keithley_daq==0.0.0` and checking that the bug is still there"
+      options:
+        - required: True
+          label: "This bug affects version `0.0.0` of `keithley_daq`."
+  - type: "checkboxes"
+    id: "operating-systems"
+    attributes:
+      label: "Please indicate which operating system(s) you are using"
+      description: "Please select the most appropriate choice(s) if your exact OS is not listed"
+      options:
+        - label: "Linux"
+        - label: "macOS"
+        - label: "Windows"
+  - type: "textarea"
+    id: "expected"
+    validations:
+      required: True
+    attributes:
+      label: "Expected behavior"
+      description: "Please explain what **should** happen"
+  - type: "textarea"
+    id: "what-happened"
+    attributes:
+      label: "Current behaviour"
+      description: "Please explain what happens instead of the expected behavior"
+    validations:
+      required: True
+  - type: "textarea"
+    id: "reproduce"
+    validations:
+      required: True
+    attributes:
+      label: "Steps to reproduce"
+      description: "Please provide steps that would allow someone to reproduce the issue"
+  - type: "textarea"
+    id: "solution"
+    attributes:
+      label: "Possible solution"
+      description: "Please suggest a possible fix or any ideas you may have about the root cause"
