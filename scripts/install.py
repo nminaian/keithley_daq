@@ -20,7 +20,7 @@ from sysconfig import get_config_var
 from tempfile import TemporaryFile
 from urllib.request import urlopen
 
-from zstandard import ZstdDecompressor
+from zstandard import ZstdDecompressor  # type: ignore
 
 BIN = Path("bin")
 """Local project binaries."""
@@ -40,7 +40,7 @@ def main():  # noqa: D103
     path = BIN / f"python{VER}"
     if not path.exists():
         install(path)
-    print(path / ("python.exe" if PLAT == "win32" else "bin/python3"))  # noqa: T201
+    print(path / ("python.exe" if PLAT == "win32" else "bin/python3"))
 
 
 def install(path: Path):

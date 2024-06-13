@@ -242,6 +242,7 @@ ignore = [
     "S301",    # Don't warn about pickling.
     "S403",    # Don't warn about pickle-like modules.
     "S404",    # Don't warn about subprocess.
+    "T201",    # Allow print
     "TCH",     # Type checking linter doesn't play nicely with pydantic
     "TD",      # Disable to-do validation. Too pedantic for now.
     "TRY003",  # Allow long exception messages
@@ -259,7 +260,6 @@ convention = "numpy"
     "E703", # Allow semicolons to suppress outputs in notebooks
     "F821", # Allow undefined names, such as `display`
     "S101", # Allow assert
-    "T201", # Allow print in notebooks
 ]
 "docs/**" = [
     "E402", # Need to allow imports below patches in docs notebooks
