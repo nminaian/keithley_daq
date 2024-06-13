@@ -31,21 +31,21 @@ if (!(Test-Path 'bin/uv*') -or !(bin/uv --version | Select-String $uvVersion)) {
         'INSTALLING UV FOR WINDOWS' | Write-Progress
         $uvInstaller = "$([System.IO.Path]::GetTempPath())$([System.Guid]::NewGuid()).ps1"
         Invoke-RestMethod "https://github.com/astral-sh/uv/releases/download/$uvVersion/uv-installer.ps1" |
-            Out-File $uvInstaller
-        powershell -Command "$uvInstaller -NoModifyPath"
+        Out-File $uvInstaller
+        powershell -Command "& '$uvInstaller' -NoModifyPath"
     }
     else {
         'INSTALLING UV' | Write-Progress
         $Env:INSTALLER_NO_MODIFY_PATH = $true
         curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/astral-sh/uv/releases/download/$uvVersion/uv-installer.sh" |
-            sh
+        sh
     }
     'UV INSTALLED' | Write-Progress -Done
 }
 
 'INSTALLING TOOLS' | Write-Progress
 $pyDevVersionRe = Get-Content '.copier-answers.yml' |
-    Select-String -Pattern '^python_version:\s?["'']([^"'']+)["'']$'
+Select-String -Pattern '^python_version:\s?["'']([^"'']+)["'']$'
 $Version = $Version ? $Version : $pyDevVersionRe.Matches.Groups[1].value
 if ($CI) {
     $py = Get-PySystem $Version
@@ -61,7 +61,7 @@ bin/uv pip install --editable=scripts
 '*** RUNNING PRE-SYNC TASKS' | Write-Progress
 if ($CI) {
     'SYNCING PROJECT WITH TEMPLATE' | Write-Progress
-    try {scripts/Sync-Template.ps1 -Stay} catch [System.Management.Automation.NativeCommandExitException] {
+    try { scripts/Sync-Template.ps1 -Stay } catch [System.Management.Automation.NativeCommandExitException] {
         git stash save --include-untracked
         scripts/Sync-Template.ps1 -Stay
         git stash pop
