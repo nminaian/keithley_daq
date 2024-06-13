@@ -1,7 +1,1 @@
-"""Description."""
-
-from pandas import DataFrame
-from pyvisa import ResourceManager
-
-DataFrame()
-ResourceManager()
+"""PyVISA interface for Keithley DAQ6510 measurements."""
