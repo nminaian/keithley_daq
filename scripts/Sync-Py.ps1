@@ -31,14 +31,14 @@ if (!(Test-Path 'bin/uv*') -or !(bin/uv --version | Select-String $uvVersion)) {
         'INSTALLING UV FOR WINDOWS' | Write-Progress
         $uvInstaller = "$([System.IO.Path]::GetTempPath())$([System.Guid]::NewGuid()).ps1"
         Invoke-RestMethod "https://github.com/astral-sh/uv/releases/download/$uvVersion/uv-installer.ps1" |
-        Out-File $uvInstaller
+            Out-File $uvInstaller
         powershell -Command "& '$uvInstaller' -NoModifyPath"
     }
     else {
         'INSTALLING UV' | Write-Progress
         $Env:INSTALLER_NO_MODIFY_PATH = $true
         curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/astral-sh/uv/releases/download/$uvVersion/uv-installer.sh" |
-        sh
+            sh
     }
     'UV INSTALLED' | Write-Progress -Done
 }
