@@ -22,7 +22,7 @@ def get_instrument():  # noqa: D103
         )
         inst.timeout = 2000
         # reset instrument
-        inst.write("*RST")
+        inst.write("*RST")  # Reset the DAQ6510
         yield inst
     finally:
         inst.close()  # type: ignore
@@ -38,20 +38,21 @@ with get_instrument() as inst:
         inst.write(":ROUT:SCAN:BUFF 'Power'")
 
         # define the scan list, set scan count to infinite, and a channel delay of 100 us
-        inst.write(":ROUTe:SCAN:CRE (@101)")
-        inst.write(":ROUTe:SCAN:CRE (@102)")
-        inst.write(":ROUTe:SCAN:CRE (@103)")
+        inst.write(":ROUT:SCAN:CRE (@101:103)")  # Generate the scan...
         # inst.write(":ROUT:SCAN:COUN:SCAN 0")
 
         # enable the graph and plot the data
         inst.write(":DISP:SCR HOME")
-        inst.write(":DISP:WATC:CHAN (@101)")
+        inst.write(":DISP:WATC:CHAN (@101:103)")
         inst.write(":DISP:SCR GRAP")
-        inst.write("FUNC 'VOLT:DC:RAT', (@101)")
-        inst.write("FUNC 'VOLT:DC:RAT', (@102)")
-        inst.write("FUNC 'VOLT:DC:RAT', (@103)")
+        inst.write("ROUT:CHAN:LAB 'IPMC 1', (@101)")  # Apply a label to channel 101
+        inst.write("ROUT:CHAN:LAB 'IPMC 2', (@102)")  # Apply a label to channel 102
+        inst.write("ROUT:CHAN:LAB 'IPMC 3', (@103)")  # Apply a label to channel 103
+        inst.write(
+            "SENS:FUNC 'VOLT:DC:RAT', (@101:103)"
+        )  # Set channels 101-103 for DC Voltage Ratio
 
-        # begin data collection for at least 10 sec
+        # begin data collection for at least xx sec
         inst.write("INIT")
         time.sleep(50)
 
@@ -62,16 +63,29 @@ with get_instrument() as inst:
     print("Reading Buffer \n")
     # Extract the data...
 
-    buffersize = inst.query(':TRAC:ACTual:END? "Sensing"')
+    buffersize = inst.query(':TRAC:ACTual:END? "Power"')
     print(buffersize)
-    ass = inst.query(f'TRAC:DATA? 1, {buffersize}, "Sensing", READ, EXTR').split(",")
+    ass = inst.query(f'TRAC:DATA? 1, {buffersize}, "Power", READ, EXTR').split(",")
     buffer = [float(val) for val in ass]
     # Data = pd.DataFrame({'Voltage':buffer[0::3], 'Time':buffer[2::3], 'Channel':buffer[1::3]}).to_csv('Butt.csv')
     SHUNT = 10.3
-    Data = pd.DataFrame({"ratio": buffer[::2], "vsense": buffer[1::2]}).assign(**{
-        "Current [mA]": lambda df: df.vsense / SHUNT,
-        "Voltage [mV]": lambda df: df.ratio * df.vsense,
-        "Power [mW]": lambda df: df["Current [mA]"] * df["Voltage [mV]"],
+    Data = pd.DataFrame({
+        "ratio1": buffer[::6],
+        "vsense1": buffer[1::6],
+        "ratio2": buffer[2::6],
+        "vsense2": buffer[3::6],
+        "ratio3": buffer[4::6],
+        "vsense3": buffer[5::6],
+    }).assign(**{
+        "Current 1 [A]": lambda df: df.vsense1 / SHUNT,
+        "Voltage 1 [V]": lambda df: df.ratio1 * df.vsense1,
+        "Power 1 [W]": lambda df: df["Current [mA]"] * df["Voltage [mV]"],
+        "Current 2 [A]": lambda df: df.vsense2 / SHUNT,
+        "Voltage 2 [V]": lambda df: df.ratio2 * df.vsense2,
+        "Power 2 [W]": lambda df: df["Current [mA]"] * df["Voltage [mV]"],
+        "Current 3 [A]": lambda df: df.vsense3 / SHUNT,
+        "Voltage 3 [V]": lambda df: df.ratio3 * df.vsense3,
+        "Power 3 [W]": lambda df: df["Current [mA]"] * df["Voltage [mV]"],
     })
 
     Data.to_csv("Data.csv")
