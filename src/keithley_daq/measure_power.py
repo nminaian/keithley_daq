@@ -1,7 +1,8 @@
 """Measure power."""
 
-import time
+from collections import defaultdict
 from contextlib import contextmanager
+from time import sleep
 
 import pandas as pd
 import pyvisa
@@ -54,7 +55,7 @@ with get_instrument() as inst:
 
         # begin data collection for at least xx sec
         inst.write("INIT")
-        time.sleep(18)
+        sleep(18)
 
     except KeyboardInterrupt:
         print("Measurement stopped by user. \n")
@@ -62,7 +63,6 @@ with get_instrument() as inst:
     inst.write("ABORT")
     print("Reading Buffer \n")
     # Extract the data...
-
     buffersize = inst.query(':TRAC:ACTual:END? "Power"')
     print(buffersize)
     ass = inst.query(f'TRAC:DATA? 1, {buffersize}, "Power", READ, EXTR, REL').split(",")
@@ -70,17 +70,38 @@ with get_instrument() as inst:
 
     # Data = pd.DataFrame({'Voltage':buffer[0::3], 'Time':buffer[2::3], 'Channel':buffer[1::3]}).to_csv('Butt.csv')
     SHUNT = 10.3
-    Data = pd.DataFrame({
-        "ratio1": buffer[::9],
-        "vsense1": buffer[1::9],
-        "time1": buffer[2::9],
-        "ratio2": buffer[3::9],
-        "vsense2": buffer[4::9],
-        "time2": buffer[5::9],
-        "ratio3": buffer[6::9],
-        "vsense3": buffer[7::9],
-        "time3": buffer[8::9],
-    }).assign(**{
+    NUM_CHANNELS = 3
+    SIGNAL_NAMES = ["ratio", "vsense", "time"]
+    SIGNALS_PER_CHANNEL = len(SIGNAL_NAMES)
+    NUM_SIGNALS = NUM_CHANNELS * SIGNALS_PER_CHANNEL
+    equal_length_data = list(
+        zip(*[buffer[i::NUM_SIGNALS] for i in range(NUM_SIGNALS)], strict=False)
+    )
+    raw_data = defaultdict(list)
+    for (
+        ratio1,
+        vsense1,
+        time1,
+        ratio2,
+        vsense2,
+        time2,
+        ratio3,
+        vsense3,
+        time3,
+    ) in equal_length_data:
+        for name, signal in {
+            "ratio1": ratio1,
+            "vsense1": vsense1,
+            "time1": time1,
+            "ratio2": ratio2,
+            "vsense2": vsense2,
+            "time2": time2,
+            "ratio3": ratio3,
+            "vsense3": vsense3,
+            "time3": time3,
+        }.items():
+            raw_data[name].append(signal)
+    data = pd.DataFrame(raw_data).assign(**{
         "Current 1 [A]": lambda df: df.vsense1 / SHUNT,
         "Voltage 1 [V]": lambda df: df.ratio1 * df.vsense1,
         "Power 1 [W]": lambda df: df["Current 1 [A]"] * df["Voltage 1 [V]"],
@@ -91,6 +112,5 @@ with get_instrument() as inst:
         "Voltage 3 [V]": lambda df: df.ratio3 * df.vsense3,
         "Power 3 [W]": lambda df: df["Current 3 [A]"] * df["Voltage 3 [V]"],
     })
-
-    Data.to_csv("Data.csv")
+    data.to_csv("Data.csv")
     # alternate: **{"Current ": lambda df: df.vsense / SHUNT} or voltage=lambda df: df.ratio * df.vsense,
