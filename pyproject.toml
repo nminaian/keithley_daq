@@ -10,7 +10,15 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
 classifiers = ["License :: OSI Approved :: MIT License"]
-dependencies = ["pandas>=2.2.2", "pyvisa>=1.14.1", "pyvisa-py>=0.7.2"]
+dependencies = [
+    "numpy==1.26.4",
+    "pandas[hdf5,performance]>=2.2.2",
+    "pyvisa>=1.14.1",
+    "pyusb>=1.2.1",
+    "pyvisa-py>=0.7.2",
+    "pyvisa-sim>=0.6.0",
+    "zeroconf>=0.132.2",
+]
 [project.urls]
 Changes = "https://nminaian.github.io/keithley_daq/changelog.html"
 Docs = "https://nminaian.github.io/keithley_daq"
@@ -33,7 +41,7 @@ ignore_errors = true
 [tool.fawltydeps]
 deps = ["pyproject.toml"]
 code = ["src"]
-ignore_unused = ["pyvisa-py"]
+ignore_unused = ["pyusb", "pyvisa-py", "pyvisa-sim", "zeroconf"]
 
 [tool.pytest.ini_options]
 addopts = '''

@@ -29,27 +29,31 @@ def get_instrument():  # noqa: D103
 
 
 with get_instrument() as inst:
-    print(f"System version: {inst.query(':system:version?')}")
+    print(f"System Version: {inst.query(':system:version?')}")
     try:
         # clears the buffer, creates the sensing buffer, and assigns all data to the buffer
-        inst.write("TRAC:MAKE 'Sensing', 3000000, FULL")
-        inst.write("TRACe:CLEar 'Sensing'")
-        inst.write(":TRAC:FILL:MODE CONT, 'Sensing'")
-        inst.write(":ROUT:SCAN:BUFF 'Sensing'")
+        inst.write("TRAC:MAKE 'Power', 3000000, FULL")
+        inst.write("TRACe:CLEar 'Power'")
+        inst.write(":TRAC:FILL:MODE CONT, 'Power'")
+        inst.write(":ROUT:SCAN:BUFF 'Power'")
 
         # define the scan list, set scan count to infinite, and a channel delay of 100 us
         inst.write(":ROUTe:SCAN:CRE (@101)")
-        inst.write(":ROUT:SCAN:COUN:SCAN 0")
+        inst.write(":ROUTe:SCAN:CRE (@102)")
+        inst.write(":ROUTe:SCAN:CRE (@103)")
+        # inst.write(":ROUT:SCAN:COUN:SCAN 0")
 
         # enable the graph and plot the data
         inst.write(":DISP:SCR HOME")
         inst.write(":DISP:WATC:CHAN (@101)")
         inst.write(":DISP:SCR GRAP")
         inst.write("FUNC 'VOLT:DC:RAT', (@101)")
+        inst.write("FUNC 'VOLT:DC:RAT', (@102)")
+        inst.write("FUNC 'VOLT:DC:RAT', (@103)")
 
         # begin data collection for at least 10 sec
         inst.write("INIT")
-        time.sleep(10)
+        time.sleep(50)
 
     except KeyboardInterrupt:
         print("Measurement stopped by user. \n")
@@ -63,11 +67,12 @@ with get_instrument() as inst:
     ass = inst.query(f'TRAC:DATA? 1, {buffersize}, "Sensing", READ, EXTR').split(",")
     buffer = [float(val) for val in ass]
     # Data = pd.DataFrame({'Voltage':buffer[0::3], 'Time':buffer[2::3], 'Channel':buffer[1::3]}).to_csv('Butt.csv')
-    SHUNT = 0.91
-    Data = pd.DataFrame({"ratio": buffer[0::3], "vsense": buffer[1::3]}).assign(**{
+    SHUNT = 10.3
+    Data = pd.DataFrame({"ratio": buffer[::2], "vsense": buffer[1::2]}).assign(**{
         "Current [mA]": lambda df: df.vsense / SHUNT,
         "Voltage [mV]": lambda df: df.ratio * df.vsense,
-        "Power [mW]": lambda df: df.current * df.voltage,
+        "Power [mW]": lambda df: df["Current [mA]"] * df["Voltage [mV]"],
     })
 
+    Data.to_csv("Data.csv")
     # alternate: **{"Current ": lambda df: df.vsense / SHUNT} or voltage=lambda df: df.ratio * df.vsense,
