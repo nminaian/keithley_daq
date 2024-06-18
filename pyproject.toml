@@ -41,7 +41,7 @@ ignore_errors = true
 [tool.fawltydeps]
 deps = ["pyproject.toml"]
 code = ["src"]
-ignore_unused = ["pyusb", "pyvisa-py", "pyvisa-sim", "zeroconf"]
+ignore_unused = ["numpy", "pyusb", "pyvisa-py", "pyvisa-sim", "zeroconf"]
 
 [tool.pytest.ini_options]
 addopts = '''
