@@ -2,7 +2,7 @@
 _commit: 86fa907
 _src_path: gh:blakeNaccarato/copier-python
 actions_runner: ubuntu-22.04
-active: true
+active: false
 github_repo_name: keithley_daq
 project_description: PyVISA interface for Keithley DAQ6510 measurements.
 project_email: n.minaian@gmail.com

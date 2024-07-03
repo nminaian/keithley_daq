@@ -3,7 +3,7 @@
   "description": "Establish base config, schedule, and manager defaults",
   "addLabels": ["dependencies"],
   "extends": ["config:base", "group:all", ":enablePreCommit"],
-  "dependencyDashboardApproval": false,
+  "dependencyDashboardApproval": true,
   "schedule": ["on the 16th day of the month"],
   "git-submodules": {
     "enabled": true
