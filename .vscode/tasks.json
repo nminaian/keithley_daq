@@ -6,9 +6,30 @@
   "inputs": [
     {
       "id": "templateOptions",
-      "description": "Template options.",
       "type": "pickString",
-      "options": ["", "-Stay", "-Stay -Prompt", "-Recopy -Prompt"]
+      "description": "Template options.",
+      "options": ["", "-Prompt", "-Stay", "-Stay -Prompt", "-Recopy -Prompt"]
+    },
+    {
+      "id": "ref",
+      "type": "promptString",
+      "description": "Commit SHA or other VCS reference."
+    },
+    {
+      "id": "dependency",
+      "type": "promptString",
+      "description": "Show tree of packages requesting this dependency."
+    },
+    {
+      "id": "version",
+      "type": "promptString",
+      "description": "Version number."
+    },
+    {
+      "id": "changeType",
+      "type": "pickString",
+      "description": "Change type.",
+      "options": ["breaking", "deprecation", "change"]
     }
   ],
   "tasks": [
@@ -23,6 +44,13 @@
       "problemMatcher": []
     },
     {
+      "label": "setup: Sync with specific template ref",
+      "type": "shell",
+      "command": "scripts/Sync-Template.ps1 ${input:ref} ${input:templateOptions}",
+      "icon": { "id": "file-symlink-directory" },
+      "problemMatcher": []
+    },
+    {
       "label": "setup: Sync contributor environment",
       "type": "shell",
       "command": "if (!$Env:DEVCONTAINER) {scripts/Sync-Py.ps1}",
@@ -33,7 +61,7 @@
       }
     },
     {
-      "label": "setup: Perform first-time setup",
+      "label": "setup: Initialize repository",
       "type": "shell",
       "command": "scripts/Initialize-Repo.ps1",
       "icon": { "id": "file-symlink-directory" },
@@ -46,39 +74,68 @@
       "icon": { "id": "file-symlink-directory" },
       "problemMatcher": []
     },
-
-    // * -------------------------------------------------------------------------- * //
-    // * PRE-COMMIT * //
-
     {
-      "label": "pre-commit",
+      "label": "setup: Initialize Windows machine",
       "type": "shell",
-      "command": ". scripts/Initialize-Shell.ps1; pre-commit",
-      "icon": { "id": "git-commit" },
+      "options": { "shell": { "executable": "powershell" } },
+      "command": "scripts/Initialize-Windows.ps1",
+      "icon": { "id": "file-symlink-directory" },
       "problemMatcher": []
     },
     {
-      "label": "pre-commit: all",
+      "label": "setup: Initialize Linux/MacOS machine",
       "type": "shell",
-      "command": ". scripts/Initialize-Shell.ps1; pre-commit run --all-files",
-      "icon": { "id": "git-commit" },
+      "options": { "shell": { "executable": "bash" } },
+      "command": "scripts/Initialize-LinuxMacOS.sh",
+      "icon": { "id": "file-symlink-directory" },
       "problemMatcher": []
     },
-
-    // * -------------------------------------------------------------------------- * //
-    // * GIT * //
-
     {
-      "label": "git: Rebase back to fork",
+      "label": "setup: Finish initializing machine (cross-platform)",
       "type": "shell",
-      "command": "git rebase -i --fork-point main",
-      "icon": { "id": "git-branch" },
+      "command": "scripts/Initialize-Machine.ps1",
+      "icon": { "id": "file-symlink-directory" },
+      "problemMatcher": []
+    },
+    {
+      "label": "setup: Finish initializing machine (cross-platform)",
+      "type": "shell",
+      "command": "scripts/Initialize-Machine.ps1",
+      "icon": { "id": "file-symlink-directory" },
       "problemMatcher": []
     },
 
     // * -------------------------------------------------------------------------- * //
     // * OTHER TASKS * //
 
+    {
+      "label": "task: pre-commit",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; pre-commit",
+      "icon": { "id": "git-commit" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: pre-commit (all)",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; pre-commit run --all-files",
+      "icon": { "id": "git-commit" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: Rebase back to fork",
+      "type": "shell",
+      "command": "git rebase -i --fork-point main",
+      "icon": { "id": "git-branch" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: Show tree of packages requesting a dependency",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; pipdeptree --reverse --packages ${input:dependency}",
+      "icon": { "id": "versions" },
+      "problemMatcher": []
+    },
     {
       "label": "task: Run pytest with coverage",
       "type": "shell",
@@ -94,6 +151,13 @@
       "problemMatcher": []
     },
     {
+      "label": "task: Run pyright",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; pyright",
+      "icon": { "id": "check" },
+      "problemMatcher": []
+    },
+    {
       "label": "task: sphinx-autobuild docs (preview)",
       "type": "shell",
       "command": ". scripts/Initialize-Shell.ps1; sphinx-autobuild -T docs _site --ignore **/apidocs",
@@ -101,17 +165,45 @@
       "problemMatcher": []
     },
     {
-      "label": "task: profile this file",
+      "label": "task: Profile this file",
       "type": "shell",
       "command": ". scripts/Initialize-Shell.ps1; python -m cProfile -o .prof ${file}",
       "icon": { "id": "graph-line" },
       "problemMatcher": []
     },
     {
-      "label": "task: view profile results with snakeviz",
+      "label": "task: View profile results with snakeviz",
       "type": "shell",
       "command": ". scripts/Initialize-Shell.ps1; snakeviz .prof",
       "icon": { "id": "graph-line" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: Bump version",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; copier update --vcs-ref=$(git rev-parse HEAD:submodules/template) --defaults --data project_version='${input:version}'; towncrier build --yes --version '${input:version}'; git add .; git commit -m '${input:version}'",
+      "icon": { "id": "tag" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: Release version",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; $version = (Get-Content '.copier-answers.yml' | Select-String -Pattern '^project_version:\\s(.+)$').Matches.Groups[1].value; git tag --sign -m $version $version; git push; gh release create --discussion-category='announcements' --notes='' --title=$version --verify-tag $version",
+      "icon": { "id": "tag" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: Update changelog",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; python -m keithley_daq_tools add-change ${input:changeType}",
+      "icon": { "id": "tag" },
+      "problemMatcher": []
+    },
+    {
+      "label": "task: Update changelog with the latest commit's message",
+      "type": "shell",
+      "command": ". scripts/Initialize-Shell.ps1; towncrier create +$((Get-Date).ToUniversalTime().ToString('o').Replace(':','-')).change.md --content $($(git log -1 --format='%s') + ' ([' + $(git rev-parse --short HEAD) + '](https://github.com/nminaian/keithley_daq/commit/' + $(git rev-parse HEAD) + '))\n')",
+      "icon": { "id": "tag" },
       "problemMatcher": []
     }
   ]

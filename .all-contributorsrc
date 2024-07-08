@@ -1,0 +1,10 @@
+{
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "files": [
+    "CONTRIBUTORS.md",
+    "README.md"
+  ],
+  "projectName": "keithley_daq",
+  "projectOwner": "nminaian"
+}

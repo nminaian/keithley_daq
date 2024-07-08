@@ -1,12 +1,23 @@
 """CLI for tools."""
 
 from collections.abc import Collection
+from json import dumps
 from pathlib import Path
 from re import finditer
+from sys import version_info
 
 from cyclopts import App
 
+from keithley_daq_tools import add_changes
 from keithley_daq_tools.sync import check_compilation, escape
+from keithley_daq_tools.types import ChangeType
+
+if version_info >= (3, 11):  # noqa: UP036, RUF100
+    from tomllib import loads  # pyright: ignore[reportMissingImports]
+else:
+    from toml import (  # pyright: ignore[reportMissingModuleSource, reportMissingImports]
+        loads,
+    )
 
 APP = App(help_format="markdown")
 """CLI."""
@@ -20,6 +31,12 @@ def main():  # noqa: D103
 def compile(high: bool = False):  # noqa: A001
     """Compile."""
     log(check_compilation(high))
+
+
+@APP.command
+def add_change(change: ChangeType = "change"):
+    """Add change."""
+    add_changes.add_change(change)
 
 
 @APP.command
@@ -45,6 +62,19 @@ def get_actions():
             for match in finditer(r'uses:\s?"?(?P<action>.+)@', contents)
         ])
     log(sorted(set(actions)))
+
+
+@APP.command
+def elevate_pyright_warnings():
+    """Elevate Pyright warnings to errors."""
+    config = loads(Path("pyproject.toml").read_text("utf-8"))
+    pyright = config["tool"]["pyright"]
+    for k, v in pyright.items():
+        if (rule := k).startswith("report") and (_level := v) == "warning":
+            pyright[rule] = "error"
+    Path("pyrightconfig.json").write_text(
+        encoding="utf-8", data=dumps(pyright, indent=2)
+    )
 
 
 def log(obj):

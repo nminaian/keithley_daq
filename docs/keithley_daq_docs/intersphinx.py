@@ -1,5 +1,7 @@
 """Intersphinx URL handlers."""
 
+from __future__ import annotations
+
 from keithley_daq_docs.types import IspxMappingValue
 
 

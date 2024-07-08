@@ -4,7 +4,9 @@ Param(
     # Python version.
     [string]$Version,
     # Sync to highest dependencies.
-    [switch]$High
+    [switch]$High,
+    # Perform minimal sync for release workflow.
+    [switch]$Release
 )
 
 . scripts/Common.ps1
@@ -17,13 +19,13 @@ $High = $High ? $High : [bool]$Env:SYNC_PY_HIGH
 $CI = $Env:SYNC_PY_DISABLE_CI ? $null : $Env:CI
 $Devcontainer = $Env:SYNC_PY_DISABLE_DEVCONTAINER ? $null : $Env:DEVCONTAINER
 $Env:UV_SYSTEM_PYTHON = $CI ? 'true' : $null
-if ($CI) { $msg = 'CI' }
+if (!$Release -and $CI) { $msg = 'CI' }
 elseif ($Devcontainer) { $msg = 'devcontainer' }
-else { $msg = 'contributor environment' }
+elseif ($Release) { $msg = 'release' }
 "Will run $msg steps" | Write-Progress -Info
 
 'FINDING UV' | Write-Progress
-$uvVersionRe = Get-Content 'requirements/uv.in' | Select-String -Pattern '^uv==(.+)$'
+$uvVersionRe = Get-Content 'requirements/uv.txt' | Select-String -Pattern '^uv==(.+)$'
 $uvVersion = $uvVersionRe.Matches.Groups[1].value
 if (!(Test-Path 'bin/uv*') -or !(bin/uv --version | Select-String $uvVersion)) {
     $Env:CARGO_HOME = '.'
@@ -45,11 +47,20 @@ if (!(Test-Path 'bin/uv*') -or !(bin/uv --version | Select-String $uvVersion)) {
 
 'INSTALLING TOOLS' | Write-Progress
 $pyDevVersionRe = Get-Content '.copier-answers.yml' |
-Select-String -Pattern '^python_version:\s?["'']([^"'']+)["'']$'
+    Select-String -Pattern '^python_version:\s?["'']([^"'']+)["'']$'
 $Version = $Version ? $Version : $pyDevVersionRe.Matches.Groups[1].value
+$MajorMinorVersionRe = $Version | Select-String -Pattern '^([^.]+\.[^.]+).*$'
+$Version = $MajorMinorVersionRe.Matches.Groups[1].value
 if ($CI) {
     $py = Get-PySystem $Version
     "Using $(Resolve-Path $py)" | Write-Progress -Info
+    if ($Release) {
+        'ONLY INSTALLING BUILD TOOLS' | Write-Progress
+        bin/uv pip install --requirement='requirements/build.txt'
+        'BUILD TOOLS INSTALLED' | Write-Progress -Done
+        '****** DONE ******' | Write-Progress -Done
+        return
+    }
 }
 else {
     $py = Get-Py $Version
@@ -61,7 +72,8 @@ bin/uv pip install --editable=scripts
 '*** RUNNING PRE-SYNC TASKS' | Write-Progress
 if ($CI) {
     'SYNCING PROJECT WITH TEMPLATE' | Write-Progress
-    try { scripts/Sync-Template.ps1 -Stay } catch [System.Management.Automation.NativeCommandExitException] {
+    keithley_daq_tools elevate-pyright-warnings
+    try {scripts/Sync-Template.ps1 -Stay} catch [System.Management.Automation.NativeCommandExitException] {
         git stash save --include-untracked
         scripts/Sync-Template.ps1 -Stay
         git stash pop
