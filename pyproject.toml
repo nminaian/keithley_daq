@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "keithley_daq"
 version = "0.0.0"
-description = "PyVISA interface for Keithley DAQ6510 measurements."
+description = "PyVISA interface for Keithley DAQ6510 measurements"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
