@@ -49,11 +49,11 @@ with get_instrument() as inst:
         inst.write(":DISP:SCR GRAP")
         inst.write("ROUT:CHAN:LAB 'PVC_Gel_1', (@101)")  # Apply a label to channel 101
         inst.write("ROUT:CHAN:LAB 'PVC_Gel_2', (@102)")  # Apply a label to channel 102
-        inst.write("ROUT:CHAN:LAB 'PVC_Gel_3', (@103)")  # Apply a label to channel 103
-        inst.write("ROUT:CHAN:LAB 'PVC_Gel_4', (@104)")  # Apply a label to channel 104
-        inst.write("ROUT:CHAN:LAB 'PVC_Gel_5', (@104)")  # Apply a label to channel 104
+        # inst.write("ROUT:CHAN:LAB 'PVC_Gel_3', (@103)")  # Apply a label to channel 103
+        # inst.write("ROUT:CHAN:LAB 'PVC_Gel_4', (@104)")  # Apply a label to channel 104
+        # inst.write("ROUT:CHAN:LAB 'PVC_Gel_5', (@105)")  # Apply a label to channel 105
         inst.write(
-            "SENS:FUNC 'VOLT:DC:RAT', (@101:105)"
+            "SENS:FUNC 'VOLT:DC:RAT', (@101:102)"
         )  # Set channels 101-104 for DC Voltage Ratio
 
         # begin data collection for at least xx sec
@@ -88,15 +88,15 @@ with get_instrument() as inst:
         ratio2,
         vsense2,
         time2,
-        ratio3,
-        vsense3,
-        time3,
-        ratio4,
-        vsense4,
-        time4,
-        ratio5,
-        vsense5,
-        time5,
+        # ratio3,
+        # vsense3,
+        # time3,
+        # ratio4,
+        # vsense4,
+        # time4,
+        # ratio5,
+        # vsense5,
+        # time5,
     ) in equal_length_data:
         for name, signal in {
             "ratio1": ratio1,
@@ -105,15 +105,15 @@ with get_instrument() as inst:
             "ratio2": ratio2,
             "vsense2": vsense2,
             "time2": time2,
-            "ratio3": ratio3,
-            "vsense3": vsense3,
-            "time3": time3,
-            "ratio4": ratio4,
-            "vsense4": vsense4,
-            "time4": time4,
-            "ratio5": ratio5,
-            "vsense5": vsense5,
-            "time5": time5,
+            # "ratio3": ratio3,
+            # "vsense3": vsense3,
+            # "time3": time3,
+            # "ratio4": ratio4,
+            # "vsense4": vsense4,
+            # "time4": time4,
+            # "ratio5": ratio5,
+            # "vsense5": vsense5,
+            # "time5": time5,
         }.items():
             raw_data[name].append(signal)
     data = pd.DataFrame(raw_data).assign(**{
@@ -124,15 +124,15 @@ with get_instrument() as inst:
         "Current 2 [A]": lambda df: df.vsense2 / SHUNT,
         "Voltage 2 [V]": lambda df: df.ratio2 * df.vsense2,
         "Power 2 [W]": lambda df: df["Current 2 [A]"] * df["Voltage 2 [V]"],
-        "Current 3 [A]": lambda df: df.vsense3 / SHUNT,
-        "Voltage 3 [V]": lambda df: df.ratio3 * df.vsense3,
-        "Power 3 [W]": lambda df: df["Current 3 [A]"] * df["Voltage 3 [V]"],
-        "Current 4 [A]": lambda df: df.vsense4 / SHUNT,
-        "Voltage 4 [V]": lambda df: df.ratio4 * df.vsense4,
-        "Power 4 [W]": lambda df: df["Current 4 [A]"] * df["Voltage 4 [V]"],
-        "Current 5 [A]": lambda df: df.vsense5 / SHUNT,
-        "Voltage 5 [V]": lambda df: df.ratio5 * df.vsense5,
-        "Power 5 [W]": lambda df: df["Current 5 [A]"] * df["Voltage 5 [V]"],
+        # "Current 3 [A]": lambda df: df.vsense3 / SHUNT,
+        # "Voltage 3 [V]": lambda df: df.ratio3 * df.vsense3,
+        # "Power 3 [W]": lambda df: df["Current 3 [A]"] * df["Voltage 3 [V]"],
+        # "Current 4 [A]": lambda df: df.vsense4 / SHUNT,
+        # "Voltage 4 [V]": lambda df: df.ratio4 * df.vsense4,
+        # "Power 4 [W]": lambda df: df["Current 4 [A]"] * df["Voltage 4 [V]"],
+        # "Current 5 [A]": lambda df: df.vsense5 / SHUNT,
+        # "Voltage 5 [V]": lambda df: df.ratio5 * df.vsense5,
+        # "Power 5 [W]": lambda df: df["Current 5 [A]"] * df["Voltage 5 [V]"],
     })
     data.to_csv("Data.csv")
     # alternate: **{"Current ": lambda df: df.vsense / SHUNT} or voltage=lambda df: df.ratio * df.vsense,
@@ -158,9 +158,9 @@ with get_instrument() as inst:
     square_padding = 100
     square1_pos = (square_padding, square_padding)
     square2_pos = (SCREEN_WIDTH - square_padding - square_size, square_padding)
-    square3_pos = (square_padding, SCREEN_HEIGHT - square_padding - square_size)
-    square4_pos = (SCREEN_WIDTH - square_padding - square_size, SCREEN_HEIGHT - square_padding - square_size)
-    square5_pos = (87.5, 87.5)
+    # square3_pos = (square_padding, SCREEN_HEIGHT - square_padding - square_size)
+    # square4_pos = (SCREEN_WIDTH - square_padding - square_size, SCREEN_HEIGHT - square_padding - square_size)
+    # square5_pos = (87.5, 87.5)
     "Based on my estimate this should put a square in the middle, can edit later"
 
     # square1_color = WHITE
@@ -177,18 +177,22 @@ with get_instrument() as inst:
         io=r"Data.csv",
         header=18,
         index_col=0,
-        usecols=["Time", "CH111", "CH112", "CH113", "CH114", "CH114"],
+        usecols=["Time", "CH111", "CH112"],
     )
+
+# Add "CH113", "CH114", "CH114" to usecols based on number of gels
 
     j1_voltages = list(volt_data["CH111"])
     j2_voltages = list(volt_data["CH112"])
-    j3_voltages = list(volt_data["CH113"])
-    j4_voltages = list(volt_data["CH114"])
-    j5_voltages = list(volt_data["CH115"])
+    # j3_voltages = list(volt_data["CH113"])
+    # j4_voltages = list(volt_data["CH114"])
+    # j5_voltages = list(volt_data["CH115"])
 
     # Now zip lists together to form a list of tuples (psuedo-array)
     # Be mindful to convert zip object to list
-    volt_data = list(zip(j1_voltages, j2_voltages, j3_voltages, j4_voltages, j5_voltages))
+    volt_data = list(zip(j1_voltages, j2_voltages))
+
+# Add j3_voltages, j4_voltages, j5_voltages to list above based on number of gels
 
     # Main animation loop
     # Iterates through a list of tuples stored in # volt_data
@@ -201,9 +205,9 @@ with get_instrument() as inst:
 
         square1_color = junction_colors[0]
         square2_color = junction_colors[1]
-        square3_color = junction_colors[2]
-        square4_color = junction_colors[3]
-        square4_color = junction_colors[4]
+        # square3_color = junction_colors[2]
+        # square4_color = junction_colors[3]
+        # square4_color = junction_colors[4]
 
         # Draw the squares
         screen.fill(WHITE)
@@ -217,21 +221,21 @@ with get_instrument() as inst:
             square2_color,
             (square2_pos[0], square2_pos[1], square_size, square_size),
         )
-        pygame.draw.rect(
-            screen,
-            square3_color,
-            (square3_pos[0], square3_pos[1], square_size, square_size),
-        )
-        pygame.draw.rect(
-            screen,
-            square4_color,
-            (square4_pos[0], square4_pos[1], square_size, square_size),
-        )
-        pygame.draw.rect(
-            screen,
-            square5_color,
-            (square5_pos[0], square4_pos[1], square_size, square_size),
-        )
+        # pygame.draw.rect(
+        #     screen,
+        #     square3_color,
+        #     (square3_pos[0], square3_pos[1], square_size, square_size),
+        # )
+        # pygame.draw.rect(
+        #     screen,
+        #     square4_color,
+        #     (square4_pos[0], square4_pos[1], square_size, square_size),
+        # )
+        # pygame.draw.rect(
+        #     screen,
+        #     square5_color,
+        #     (square5_pos[0], square4_pos[1], square_size, square_size),
+        # )
 
         # Update the screen
         pygame.display.update()
