@@ -6,7 +6,7 @@ exclude: |
   $)
 ci:
   skip:
-    - "sync"
+    # - "sync"
     - "fawltydeps-src"
     - "fawltydeps-docs"
     - "fawltydeps-scripts"
@@ -24,15 +24,15 @@ repos:
       - id: "check-useless-excludes"
   - repo: "local"
     hooks:
-      - id: "sync"
-        name: "sync"
-        stages:
-          - "pre-commit"
-          - "post-checkout"
-        pass_filenames: false
-        language: "system"
-        entry: |
-          pwsh -Command ". scripts/Initialize-Shell.ps1; scripts/Sync-Py.ps1"
+      # - id: "sync"
+      #   name: "sync"
+      #   stages:
+      #     - "pre-commit"
+      #     - "post-checkout"
+      #   pass_filenames: false
+      #   language: "system"
+      #   entry: |
+      #     pwsh -Command ". scripts/Initialize-Shell.ps1; scripts/Sync-Py.ps1"
       - id: "fawltydeps-src"
         name: "fawltydeps-src"
         pass_filenames: false
