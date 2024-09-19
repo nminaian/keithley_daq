@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 from dulwich.repo import Repo
 
-from keithley_daq_tools.types import ChangeType
+from dev.tools.types import ChangeType
 
 
 def add_change(typ: ChangeType = "change"):
@@ -20,7 +20,7 @@ def add_change(typ: ChangeType = "change"):
     change = get_change(owner, repo, issue)
     content = quote(f"{change.name}\n")
     run(
-        split(f"""towncrier create --content {content} {change.id}.{typ}.md"""),  # noqa: S603
+        split(f"""towncrier create --content {content} {change.id}.{typ}.md"""),
         check=True,
     )
 
@@ -94,7 +94,7 @@ def query_gh_issue(
 ) -> dict[str, Any]:
     """Query GitHub for an issue."""
     result = run(
-        [  # noqa: S607, S603
+        [
             "gh",
             "api",
             "graphql",

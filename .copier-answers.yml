@@ -1,8 +1,7 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 2024.1.1-67-g778e22b
+_commit: 2024.1.1-237-gc7f505b
 _src_path: gh:blakeNaccarato/copier-python
 actions_runner: ubuntu-22.04
-active: false
 github_repo_name: keithley_daq
 project_description: PyVISA interface for Keithley DAQ6510 measurements
 project_email: n.minaian@gmail.com

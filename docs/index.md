@@ -1,6 +1,6 @@
 # keithley_daq
 
-[![All Contributors](https://img.shields.io/github/all-contributors/nminaian/keithley_daq?color=ee8449&style=flat-square)](../README.md#contributors)
+[![All Contributors](https://img.shields.io/github/all-contributors/nminaian/keithley_daq?color=ee8449&style=flat-square)](contributors)
 
 PyVISA interface for Keithley DAQ6510 measurements.
 

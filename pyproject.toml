@@ -10,26 +10,22 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
 classifiers = [
-    "License :: OSI Approved :: MIT License",
-    # ? Also in CI (https://github.com/actions/python-versions/releases)
-    # "Programming Language :: Python :: 3.7",  # ? EOL (https://devguide.python.org/versions/)
-    # "Programming Language :: Python :: 3.8",  # ? EOL soon (https://devguide.python.org/versions/)
-    # "Programming Language :: Python :: 3.9",  # ? `sphinx-autobuild` broken even when pointing to fix (https://github.com/sphinx-doc/sphinx-autobuild/issues/166)
-    # "Programming Language :: Python :: 3.10", # ? Require 3.11 for now
-    "Programming Language :: Python :: 3.11",
-    # "Programming Language :: Python :: 3.12", # ? Require 3.11 for now
-    # "Programming Language :: Python :: 3.13",  # ? (via myst-nb) https://github.com/crate-py/rpds/issues/72
-    # "Programming Language :: Python :: 3.14",  # ? Unreleased (https://peps.python.org/pep-0745)
+  "License :: OSI Approved :: MIT License",
+  # ? Also in CI (https://github.com/actions/python-versions/releases)
+  "Programming Language :: Python :: 3.11",
+  # "Programming Language :: Python :: 3.12", # ? Require 3.11 for now
+  # "Programming Language :: Python :: 3.13",  # ? (via myst-nb) https://github.com/crate-py/rpds/issues/72
+  # "Programming Language :: Python :: 3.14",  # ? Not yet beta (https://peps.python.org/pep-0745)
 ]
 dependencies = [
-    "numpy==1.26.4",
-    "pandas[hdf5,performance]>=2.2.2",
-    "pygame==2.6.0",
-    "pyvisa>=1.14.1",
-    "pyusb>=1.2.1",
-    "pyvisa-py>=0.7.2",
-    "pyvisa-sim>=0.6.0",
-    "zeroconf>=0.132.2",
+  "numpy==1.26.4",
+  "pandas[hdf5,performance]>=2.2.2",
+  "pygame==2.6.0",
+  "pyvisa>=1.14.1",
+  "pyusb>=1.2.1",
+  "pyvisa-py>=0.7.2",
+  "pyvisa-sim>=0.6.0",
+  "zeroconf>=0.132.2",
 ]
 [project.urls]
 Changes = "https://nminaian.github.io/keithley_daq/changelog.html"
@@ -40,33 +36,83 @@ Tracker = "https://github.com/nminaian/keithley_daq/issues"
 name = "Nazanin Minaian"
 email = "n.minaian@gmail.com"
 
+[tool.uv]
+constraint-dependencies = [
+  # ? Security
+  # ? https://nvd.nist.gov/vuln/detail/CVE-2024-37891
+  # ? via sphinx
+  "urllib3>=2.2.2",
+]
+dev-dependencies = [
+  # ? Workspaces
+  "dev",
+  # ? Dev
+  "debugpy==1.8.2",
+  "fawltydeps==0.16.0",
+  "pipdeptree==2.23.0",
+  "pre-commit==3.7.1",
+  "pyright==1.1.371",
+  "ruff==0.5.1",
+  "snakeviz==2.2.0",
+  "sourcery==1.21.0",
+  "towncrier==23.11.0",
+  # ? Docs
+  "linkify-it-py==2.0.3",
+  "myst-nb==1.1.1",
+  "sphinx-autobuild==2024.4.16",
+  "sphinx-autodoc2==0.5.0",
+  "sphinx-book-theme==1.1.3",
+  "sphinx-design==0.6.0",
+  "sphinx-thebe==0.3.1",
+  "sphinx-tippy==0.4.3",
+  "sphinx-togglebutton==0.3.2",
+  "sphinxcontrib-bibtex==2.6.2",
+  "sphinxcontrib-mermaid==0.9.2",
+  "sphinxcontrib-towncrier==0.4.0a0",
+  # ? Tests
+  "pytest-cov==5.0.0",
+  "pytest-custom-exit-code==0.3.0",
+  "pytest-github-actions-annotate-failures==0.2.0",
+  "pytest==8.2.2",
+]
+[tool.uv.pip]
+all-extras = true
+[tool.uv.workspace]
+members = ["packages/*"]
+[tool.uv.sources]
+dev = { workspace = true }
+
 [tool.coverage.run]
 branch = true
-source = [
-    "keithley_daq",
-    "keithley_daq_docs",
-    "keithley_daq_tests",
-    "keithley_daq_tools",
-]
-[tool.coverage.report]
-ignore_errors = true
+source = ["keithley_daq", "dev", "tests"]
+
 [tool.fawltydeps]
 deps = ["pyproject.toml"]
 code = ["src"]
 ignore_unused = ["numpy", "pyusb", "pyvisa-py", "pyvisa-sim", "zeroconf"]
 
 [tool.pytest.ini_options]
-addopts = '''
-    --strict-config
-    --strict-markers
-    --color yes
-    -p no:legacypaths
-    -r a
-'''
+addopts = """
+  --strict-config
+  --strict-markers
+  --suppress-no-test-exit-code
+  --color=yes
+  -p no:legacypaths
+  -r a
+"""
 cache_dir = ".cache/.pytest_cache"
 markers = "slow"
 testpaths = "tests"
 xfail_strict = true
+
+[tool.env]
+COVERAGE_CORE = "sysmon"
+JUPYTER_PLATFORM_DIRS = "1"
+PYDEVD_DISABLE_FILE_VALIDATION = "1"
+PYTHONIOENCODING = "utf-8:strict"
+PYTHONUTF8 = "1"
+PYTHONWARNDEFAULTENCODING = "1"
+PYTHONWARNINGS = "ignore"
 
 [tool.towncrier]
 directory = "changelog"
@@ -91,19 +137,9 @@ name = "Changes"
 showcontent = true
 
 [tool.pyright]
-exclude = [
-    "**/node_modules",
-    "**/__pycache__",
-    "**/.*",
-    "**/.*/**",
-    "**/.venv",
-    "**/.vscode/extensions",
-    "**/AppData",
-    "bin",
-    "submodules/template",
-    "submodules/typings",
-]
-stubPath = "submodules/typings"
+stubPath = "typings/stubs"
+exclude = ["**/node_modules", "**/__pycache__", "**/.*", ".cache", "typings"]
+ignore = ["**/node_modules", "**/__pycache__", "**/.*", ".cache", "typings"]
 typeCheckingMode = "strict"
 # Default "true" in strict
 analyzeUnannotatedFunctions = true
@@ -202,8 +238,8 @@ reportUnusedCallResult = "none"
 
 [tool.ruff]
 cache-dir = ".cache/.ruff_cache"
-extend-exclude = ["bin", "submodules"]
-extend-include = ["*.ipynb"]
+extend-exclude = ["packages", "typings"]
+extend-include = ["*.ipynb", "packages/_dev"]
 src = ["src", "docs", "scripts", "tests"]
 output-format = "grouped"
 fix = true
@@ -212,65 +248,64 @@ show-fixes = true
 [tool.ruff.lint]
 fixable = ["ALL"]
 select = [
-    "ALL",  # Select all rules
-    "D417", # Explicitly enable parameter check even when using Numpy docstrings
+  "ALL",  # Select all rules
+  "D417", # Explicitly enable parameter check even when using Numpy docstrings
 ]
 unfixable = [
-    "PIE790", # Don't remove `pass`/`...`, overridden in pre-commit
+  "PIE790", # Don't remove `pass`/`...`, overridden in pre-commit
 ]
 extend-safe-fixes = [
-    "F401", # Allow autofix for unused imports even in `__init__.py`
+  "F401", # Allow autofix for unused imports even in `__init__.py`
 ]
 ignore = [
-    "ANN",     # Don't require type annotations
-    "ARG005",  # Allow unused lambda argument. For consistency across df pipelines.
-    "C408",    # Allow dict calls
-    "COM",     # Allow magic commas and magic missing commas
-    "CPY001",  # Don't check for copyright
-    "D105",    # Allow missing docstring for magic methods
-    "DTZ",     # Timezones are important, but only contextually necessary.
-    "E501",    # Don't check line length. Black handles this.
-    "EM",      # Don't check for exception message issues
-    "ERA",     # False positives. Don't get rid of commented out code.
-    "FBT",     # Allow boolean "traps"
-    "FIX002",  # Allow TODOs
-    "FLY002",  # Allow different string representations
-    "FURB118", # Incorrectly applies `itemgetter`
-    "FURB140", # Don't replace comprehensions with starmap
-    "G0",      # Allow f-strings, etc. in Loguru logging
-    "ICN",     # Don't require these ad-hoc "conventional" import names
-    "INP001",  # False positives. Checks for packages missing `__init__.py`
-    "ISC",     # False positives. Implicit string concatenation is fine.
-    "PD009",   # Allow `df.iat`.
-    "PD011",   # Allow use of `.values`. False positives.
-    "PD013",   # Allow `stack` instead of `melt`. They're not a direct swap.
-    "PD101",   # Allow use of nunique(). False positives
-    "PD901",   # Allow `df` variable name. We are all consenting adults here.
-    "PD011",   # Allow use of `.values`. False positives.
-    "PLR6201", # Don't require set literal for membership checks
-    "PGH003",  # Until black stops wrapping special ignores, let's allow bare
-    "PIE804",  # Allow dict unpack even if unnecessary, consisent for df.assign{**...}
-    "PLC0105", # Dont enforce Hungarian notation for `TypeVar` variance
-    "PLC2701", # Allow private name imports
-    "PLR0913", # Allow more than five function arguments
-    "PLR0914", # Allow lots of local variables
-    "PLR0917", # Allow more than five positional arguments
-    "PLR1704", # Allow redefining arguments, often for sanitization
-    "PLR2004", # Allow magic values. This check is too sensitive
-    "PLR6201", # Don't require set literal for membership checks
-    "PLR6301", # Allow methods that don't reference self, may be overridden
-    "PLW0108", # Don't warn about unnecessary lambda. Often needed in pandas chains
-    "PLW0642", # Allow reassignment to `cls` and `self`
-    "PLW2901", # For loop variable
-    "RET",     # Return checks are flaky, Sourcery does fine analysing these paths
-    "S301",    # Don't warn about pickling.
-    "S403",    # Don't warn about pickle-like modules.
-    "S404",    # Don't warn about subprocess.
-    "T201",    # Allow print
-    "TCH",     # Type checking linter doesn't play nicely with pydantic
-    "TD",      # Disable to-do validation. Too pedantic for now.
-    "TRY003",  # Allow long exception messages
-    "W2",      # Allow whitespace issues. Fixed automatically by black.
+  "ANN",     # Don't require type annotations
+  "ARG005",  # Allow unused lambda argument. For consistency across df pipelines.
+  "C408",    # Allow dict calls
+  "COM",     # Allow magic commas and magic missing commas
+  "CPY001",  # Don't check for copyright
+  "D105",    # Allow missing docstring for magic methods
+  "DTZ",     # Timezones are important, but only contextually necessary.
+  "E501",    # Don't check line length. Black handles this.
+  "EM",      # Don't check for exception message issues
+  "ERA",     # False positives. Don't get rid of commented out code.
+  "FBT",     # Allow boolean "traps"
+  "FIX002",  # Allow TODOs
+  "FLY002",  # Allow different string representations
+  "FURB118", # Incorrectly applies `itemgetter`
+  "FURB140", # Don't replace comprehensions with starmap
+  "G0",      # Allow f-strings, etc. in Loguru logging
+  "ICN",     # Don't require these ad-hoc "conventional" import names
+  "INP001",  # False positives. Checks for packages missing `__init__.py`
+  "ISC",     # False positives. Implicit string concatenation is fine.
+  "PD009",   # Allow `df.iat`.
+  "PD011",   # Allow use of `.values`. False positives.
+  "PD013",   # Allow `stack` instead of `melt`. They're not a direct swap.
+  "PD101",   # Allow use of nunique(). False positives
+  "PD901",   # Allow `df` variable name. We are all consenting adults here.
+  "PD011",   # Allow use of `.values`. False positives.
+  "PLR6201", # Don't require set literal for membership checks
+  "PGH003",  # Until black stops wrapping special ignores, let's allow bare
+  "PIE804",  # Allow dict unpack even if unnecessary, consisent for df.assign{**...}
+  "PLC0105", # Dont enforce Hungarian notation for `TypeVar` variance
+  "PLC2701", # Allow private name imports
+  "PLR0913", # Allow more than five function arguments
+  "PLR0914", # Allow lots of local variables
+  "PLR0917", # Allow more than five positional arguments
+  "PLR1704", # Allow redefining arguments, often for sanitization
+  "PLR2004", # Allow magic values. This check is too sensitive
+  "PLR6201", # Don't require set literal for membership checks
+  "PLR6301", # Allow methods that don't reference self, may be overridden
+  "PLW0108", # Don't warn about unnecessary lambda. Often needed in pandas chains
+  "PLW0642", # Allow reassignment to `cls` and `self`
+  "PLW2901", # For loop variable
+  "RET",     # Return checks are flaky, Sourcery does fine analysing these paths
+  "S301",    # Don't warn about pickling.
+  "S403",    # Don't warn about pickle-like modules.
+  "S404",    # Don't warn about subprocess.
+  "TCH",     # Type checking linter doesn't play nicely with pydantic
+  "TD",      # Disable to-do validation. Too pedantic for now.
+  "TRY003",  # Allow long exception messages
+  "W2",      # Allow whitespace issues. Fixed automatically by black.
 ]
 [tool.ruff.lint.isort]
 split-on-trailing-comma = false
@@ -280,17 +315,22 @@ skip-magic-trailing-comma = true
 convention = "numpy"
 [tool.ruff.lint.extend-per-file-ignores]
 "**/*.ipynb" = [
-    "B018", # Allow "useless" expressions, which do suppress outputs in notebooks
-    "E703", # Allow semicolons to suppress outputs in notebooks
-    "F821", # Allow undefined names, such as `display`
-    "S101", # Allow assert
+  "B018", # Allow "useless" expressions, which do suppress outputs in notebooks
+  "E703", # Allow semicolons to suppress outputs in notebooks
+  "F821", # Allow undefined names, such as `display`
+  "S101", # Allow assert
+  "T201", # Allow print in notebooks
 ]
-"docs/**" = [
-    "E402", # Need to allow imports below patches in docs notebooks
+"packages/_dev/dev/tools/add_changes.py" = [
+  "S603", # Allow shell expressions here
+  "S607", # Allow shell expressions here
+]
+"docs/**.ipynb" = [
+  "E402", # Need to allow imports below patches in docs notebooks
 ]
 "tests/**" = [
-    "ARG001", # Allow unused arguments
-    "S101",   # Allow assert
-    "SIM300", # Allow constants (expectations) on the RHS
-    "SLF001", # Allow private member access in tests
+  "ARG001", # Allow unused arguments
+  "S101",   # Allow assert
+  "SIM300", # Allow constants (expectations) on the RHS
+  "SLF001", # Allow private member access in tests
 ]
