@@ -137,7 +137,7 @@ name = "Changes"
 showcontent = true
 
 [tool.pyright]
-stubPath = "typings"
+stubPath = "typings/stubs"
 exclude = ["**/node_modules", "**/__pycache__", "**/.*", ".cache", "typings"]
 ignore = ["**/node_modules", "**/__pycache__", "**/.*", ".cache", "typings"]
 typeCheckingMode = "strict"
