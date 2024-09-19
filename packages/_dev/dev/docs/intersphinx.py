@@ -1,8 +1,6 @@
 """Intersphinx URL handlers."""
 
-from __future__ import annotations
-
-from keithley_daq_docs.types import IspxMappingValue
+from dev.docs.types import IspxMappingValue
 
 
 def get_url(url: str, latest: bool = False):

@@ -3,21 +3,20 @@
 from collections.abc import Collection
 from json import dumps
 from pathlib import Path
-from re import finditer
+from re import finditer, sub
+from shlex import join, split
 from sys import version_info
 
 from cyclopts import App
 
-from keithley_daq_tools import add_changes
-from keithley_daq_tools.sync import check_compilation, escape
-from keithley_daq_tools.types import ChangeType
+from dev.tools import add_changes, environment
+from dev.tools.environment import escape, run
+from dev.tools.types import ChangeType
 
 if version_info >= (3, 11):  # noqa: UP036, RUF100
     from tomllib import loads  # pyright: ignore[reportMissingImports]
 else:
-    from toml import (  # pyright: ignore[reportMissingModuleSource, reportMissingImports]
-        loads,
-    )
+    from toml import loads  # pyright: ignore[reportMissingModuleSource]
 
 APP = App(help_format="markdown")
 """CLI."""
@@ -28,9 +27,9 @@ def main():  # noqa: D103
 
 
 @APP.command
-def compile(high: bool = False):  # noqa: A001
-    """Compile."""
-    log(check_compilation(high))
+def init_shell():
+    """Initialize shell."""
+    log(environment.init_shell())
 
 
 @APP.command
@@ -65,6 +64,30 @@ def get_actions():
 
 
 @APP.command
+def sync_local_dev_configs():
+    """Synchronize local dev configs to shadow `pyproject.toml`, with some changes.
+
+    Duplicate pytest configuration from `pyproject.toml` to `pytest.ini`. These files
+    shadow the configuration in `pyproject.toml`, which drives CI or if shadow configs
+    are not present. Shadow configs are in `.gitignore` to facilitate local-only
+    shadowing. Concurrent test runs are disabled in the local pytest configuration which
+    slows down the usual local, granular test workflow.
+    """
+    config = loads(Path("pyproject.toml").read_text("utf-8"))
+    pytest = config["tool"]["pytest"]["ini_options"]
+    pytest["addopts"] = disable_concurrent_tests(pytest["addopts"])
+    Path("pytest.ini").write_text(
+        encoding="utf-8",
+        data="\n".join(["[pytest]", *[f"{k} = {v}" for k, v in pytest.items()], ""]),
+    )
+
+
+def disable_concurrent_tests(addopts: str) -> str:
+    """Normalize `addopts` string and disable concurrent pytest tests."""
+    return sub(pattern=r"-n\s[^\s]+", repl="-n 0", string=join(split(addopts)))
+
+
+@APP.command
 def elevate_pyright_warnings():
     """Elevate Pyright warnings to errors."""
     config = loads(Path("pyproject.toml").read_text("utf-8"))
@@ -77,18 +100,29 @@ def elevate_pyright_warnings():
     )
 
 
+@APP.command()
+def build_docs():
+    """Build docs."""
+    run([
+        "sphinx-autobuild",
+        "--show-traceback",
+        "docs _site",
+        *[f"--ignore **/{p}" for p in ["temp", "data", "apidocs", "*schema.json"]],
+    ])
+
+
 def log(obj):
     """Send object to `stdout`."""
     match obj:
         case str():
-            print(obj)
+            print(obj)  # noqa: T201
         case Collection():
             for o in obj:
                 log(o)
         case Path():
             log(escape(obj))
         case _:
-            print(obj)
+            print(obj)  # noqa: T201
 
 
 if __name__ == "__main__":

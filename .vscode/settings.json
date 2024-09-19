@@ -17,8 +17,8 @@
   },
   "search.exclude": {
     //? Don't search in submodules or locks by default
-    "submodules": true,
-    "lock*.json": true
+    "typings": true,
+    "uv.lock": true,
   },
   //! File nesting
   "explorer.sortOrder": "foldersNestsFiles",
@@ -31,13 +31,13 @@
   //! File associations
   "files.associations": {
     ".coveragerc": "ini",
-    ".env": "dotenv",
     ".pylintrc": "ini",
     ".root": "plaintext",
     ".sourcery.yaml": "yaml",
     "*ipython-input*": "python",
     "*requirements*.in": "pip-requirements",
-    "pyrightconfig.json": "jsonc"
+    "pyrightconfig.json": "jsonc",
+    "uv.lock": "toml",
   },
   //! Git
   "git.allowNoVerifyCommit": true,
@@ -81,6 +81,81 @@
   //! Extensions
   //* autoDocstring
   "autoDocstring.docstringFormat": "numpy-notypes",
+  //* Better Comments
+  "better-comments.tags": [
+    {
+      "tag": "!",
+      "color": "#FF2D00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "?",
+      "color": "#3498DB",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "//",
+      "color": "#474747",
+      "strikethrough": true,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "todo",
+      "color": "#FF8C00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": ".....",
+      "color": "#FF8C00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "*",
+      "color": "#98C379",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "NB:",
+      "color": "#3498DB",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
+      "tag": "...",
+      "color": "#3498DB",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    }
+  ],
   //* GitHub Actions
   "github-actions.workflows.pinned.workflows": [".github/workflows/ci.yml"],
   //* Jupyter Notebooks
@@ -125,6 +200,9 @@
   "vsicons.presets.hideExplorerArrows": true,
   "vsicons.dontShowNewVersionMessage": false,
   //! Filetype extensions
+  //* Built-in Markdown support
+  //? Doesn't play nicely with All Contributors HTML
+  "markdown.validate.referenceLinks.enabled": "ignore",
   //* Markdownlint (MD)
   "[markdown]": {
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
@@ -163,9 +241,11 @@
   },
   //* Even Better TOML (TOML)
   "[toml]": {
-    "editor.defaultFormatter": "tamasfe.even-better-toml"
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "editor.wordWrap": "off"
   },
-  "evenBetterToml.formatter.columnWidth": 88,
+  "evenBetterToml.taplo.configFile.path": ".taplo.toml",
   //! Other
   //? Other automatically added settings below
   "": ""
