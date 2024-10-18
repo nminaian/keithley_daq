@@ -116,6 +116,7 @@ with get_instrument() as inst:
     data.to_csv("Data.csv")
     # alternate: **{"Current ": lambda df: df.vsense / SHUNT} or voltage=lambda df: df.ratio * df.vsense,
 
+
 def main():
     # Initialize Pygame
     pygame.init()
@@ -166,7 +167,9 @@ def main():
 
     # Now zip lists together to form a list of tuples (psuedo-array)
     # Be mindful to convert zip object to list
-    volt_data = list(zip(j1_voltages, j2_voltages, j3_voltages, j4_voltages))
+    volt_data = list(
+        zip(j1_voltages, j2_voltages, j3_voltages, j4_voltages, strict=False)
+    )
 
     # Main animation loop
     # Iterates through a list of tuples stored in # volt_data
@@ -223,7 +226,6 @@ def volt_to_intensity(volt_tuple):
     Takes volt_tuple (voltage for all junctions) and returns a tuple of color
     intensity values related to each junction
     """
-
     # Initialize return intensity list
     intensity_list = []
 
