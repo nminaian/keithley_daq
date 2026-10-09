@@ -9,7 +9,7 @@ description = "Dev"
 dependencies = [
   # ? Dev
   "cyclopts==2.9.3",
-  "dulwich==0.22.1",
+  "dulwich==1.2.9",
   "pydantic-settings==2.5.2",
   "python-dotenv==1.0.1",
   "toml==0.10.2",
